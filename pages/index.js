@@ -3,11 +3,26 @@ import { ethers } from 'ethers';
 import Head from 'next/head'
 import abi from '../utils/WavePortal.json'
 
+const contractAddress = "0xa75ac43434D97dA0254329774627ceD354af6977";
+const contractABI = abi.abi
+
+function getContractFactory() {
+  const { ethereum } = window;
+
+  if (ethereum) {
+    const provider = new ethers.providers.Web3Provider(ethereum);
+    const signer = provider.getSigner();
+    return new ethers.Contract(contractAddress, contractABI, signer);
+  } else {
+    alert("Ethereum object doesn't exist!");
+  }
+}
+
 export default function Home() {
 
   const [currentAccount, setCurrentAccount] = useState("");
-  const contractAddress = "0xa75ac43434D97dA0254329774627ceD354af6977";
-  const contractABI = abi.abi
+  const [currentWave, setCurrentWave] = useState(0)
+  const [isLoading, setLoading] = useState(false)
 
   const checkIfWalletIsConnected = async () => {
     try {
@@ -58,18 +73,24 @@ export default function Home() {
       }
     }
 
+    const retriveTotalWave = async () => {
+      const _wavePortalContract = getContractFactory();
+      const _count = await _wavePortalContract.getTotalWaves();
+      setCurrentWave(_count.toNumber())
+    }
+
   useEffect(() => {
     checkIfWalletIsConnected();
+    retriveTotalWave();
   }, [])
   
   const wave = async () => {
+    setLoading(true)
     try {
       const { ethereum } = window;
 
       if (ethereum) {
-        const provider = new ethers.providers.Web3Provider(ethereum);
-        const signer = provider.getSigner();
-        const wavePortalContract = new ethers.Contract(contractAddress, contractABI, signer);
+        const wavePortalContract = getContractFactory();
 
         let count = await wavePortalContract.getTotalWaves();
         console.log("Retrieved total wave count...", count.toNumber());
@@ -85,12 +106,15 @@ export default function Home() {
 
         count = await wavePortalContract.getTotalWaves();
         console.log("Retrieved total wave count...", count.toNumber());
-
+        setCurrentWave(count.toNumber())
+        setLoading(false)
       } else {
         console.log("Ethereum object doesn't exist!");
+        setLoading(false)
       }
     } catch (error) {
       console.log(error)
+      setLoading(false)
     }
   }
 
@@ -106,8 +130,12 @@ export default function Home() {
           I am Ihsan! Connect your Ethereum wallet and wave at me!
         </div>
 
-        <button className="waveButton" onClick={wave}>
-          Wave at Me
+        <div className="bio">
+          Total Wave: {currentWave}
+        </div>
+
+        <button disabled={isLoading} className="waveButton" onClick={wave}>
+          {isLoading ? 'Loading' : 'Wave at Me'}
         </button>
 
         {/*
@@ -151,9 +179,8 @@ export default function Home() {
           margin-top: 16px;
           padding: 8px;
           border: 0;
-          border-radius: 5px;
-          
-      }
+          border-radius: 5px;   
+        }
       `}</style>
 
       <style jsx global>{`
