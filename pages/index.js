@@ -82,7 +82,8 @@ export default function Home() {
 
   useEffect(() => {
     checkIfWalletIsConnected();
-  }, [])
+    currentAccount && retriveTotalWave()
+  }, [currentAccount])
   
   const wave = async () => {
 
