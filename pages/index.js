@@ -67,7 +67,8 @@ export default function Home() {
         const accounts = await ethereum.request({ method: "eth_requestAccounts" });
 
         console.log("Connected", accounts[0]);
-        setCurrentAccount(accounts[0]); 
+        setCurrentAccount(accounts[0]);
+        retriveTotalWave();
       } catch (error) {
         console.log(error)
       }
@@ -81,10 +82,15 @@ export default function Home() {
 
   useEffect(() => {
     checkIfWalletIsConnected();
-    retriveTotalWave();
   }, [])
   
   const wave = async () => {
+
+    if (!currentAccount) {
+      alert("Connect your wallet first please")
+      return
+    }
+
     setLoading(true)
     try {
       const { ethereum } = window;
@@ -130,9 +136,11 @@ export default function Home() {
           I am Ihsan! Connect your Ethereum wallet and wave at me!
         </div>
 
-        <div className="bio">
-          Total Wave: {currentWave}
-        </div>
+        {
+          currentAccount && <div className="bio">
+            Total Wave: {currentWave}
+          </div>
+        }
 
         <button disabled={isLoading} className="waveButton" onClick={wave}>
           {isLoading ? 'Loading' : 'Wave at Me'}
