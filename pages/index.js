@@ -3,7 +3,7 @@ import { ethers } from 'ethers';
 import Head from 'next/head'
 import abi from '../utils/WavePortal.json'
 
-const contractAddress = "0xa75ac43434D97dA0254329774627ceD354af6977";
+const contractAddress = "0x31bFdc913D8c104ac4fcE7a72B08ebf4bf40D824";
 const contractABI = abi.abi
 
 function getContractFactory() {
